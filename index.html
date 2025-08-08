@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Wolf — Online CV</title>
+<meta name="description" content="The online CV of Wolf" />
+<link rel="icon" href="data:," />
+<style>
+  /* ===== Base reset ===== */
+  *,*::before,*::after{box-sizing:border-box}
+  :root{
+    --bg:#ffffff; --fg:#0b0f13; --muted:#5b656f; --accent:#1c6feb; --card:#f4f6f8; --line:#e6eaee;
+    --bg-dark:#0c0f12; --fg-dark:#e8edf2; --muted-dark:#9aa6b2; --card-dark:#141a20; --line-dark:#1f262d;
+    --maxw: 980px;
+  }
+  html{scroll-behavior:smooth}
+  body{
+    margin:0; font:16px/1.6 system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Inter,Arial,sans-serif;
+    color:var(--fg); background:var(--bg);
+  }
+  .dark body{color:var(--fg-dark); background:var(--bg-dark)}
+  a{color:var(--accent); text-decoration:none}
+  a:hover{text-decoration:underline}
+  /* ===== Layout ===== */
+  header{
+    border-bottom:1px solid var(--line); background:linear-gradient(180deg, rgba(28,111,235,.06), transparent);
+  }
+  .dark header{border-color:var(--line-dark); background:linear-gradient(180deg, rgba(28,111,235,.12), transparent)}
+  .wrap{max-width:var(--maxw); margin:0 auto; padding:28px 20px}
+  .top{
+    display:grid; grid-template-columns:1fr auto; gap:16px; align-items:center;
+  }
+  .id{
+    display:grid; grid-template-columns:auto 1fr; gap:16px; align-items:center;
+  }
+  .avatar{
+    width:84px; height:84px; border-radius:50%; object-fit:cover; border:2px solid var(--line);
+  }
+  .dark .avatar{border-color:var(--line-dark)}
+  .name{margin:0; font-size:28px; line-height:1.1}
+  .role{margin:2px 0 0; color:var(--muted)}
+  .dark .role{color:var(--muted-dark)}
+  .controls{display:flex; gap:10px; flex-wrap:wrap}
+  button, .btn{
+    border:1px solid var(--line); background:var(--card); color:inherit; padding:8px 12px; border-radius:8px; cursor:pointer;
+  }
+  .dark button, .dark .btn{border-color:var(--line-dark); background:var(--card-dark)}
+  nav{
+    position:sticky; top:0; z-index:5; border-bottom:1px solid var(--line); background:rgba(255,255,255,.75); backdrop-filter:saturate(180%) blur(8px);
+  }
+  .dark nav{border-color:var(--line-dark); background:rgba(12,15,18,.75)}
+  .nav{max-width:var(--maxw); margin:0 auto; padding:10px 20px; display:flex; flex-wrap:wrap; gap:14px}
+  .nav a{font-size:14px; color:inherit; opacity:.85}
+  .nav a:hover{opacity:1}
+  main .wrap{display:grid; grid-template-columns: 260px 1fr; gap:28px}
+  @media (max-width:900px){ main .wrap{grid-template-columns:1fr} }
+  aside{
+    position:sticky; top:64px; align-self:start; border:1px solid var(--line); background:var(--card); border-radius:12px; padding:16px;
+  }
+  .dark aside{border-color:var(--line-dark); background:var(--card-dark)}
+  aside h3{margin:0 0 8px; font-size:16px}
+  aside .box + .box{margin-top:16px; padding-top:16px; border-top:1px dashed var(--line)}
+  .dark aside .box + .box{border-top-color:var(--line-dark)}
+  /* ===== Content ===== */
+  section{margin-bottom:28px}
+  h2{margin:0 0 12px; font-size:22px}
+  h3{margin:10px 0 6px; font-size:18px}
+  p{margin:0 0 10px}
+  .card{
+    border:1px solid var(--line); background:var(--card); border-radius:12px; padding:16px; margin-bottom:12px;
+  }
+  .dark .card{border-color:var(--line-dark); background:var(--card-dark)}
+  .meta{color:var(--muted); font-size:14px}
+  .dark .meta{color:var(--muted-dark)}
+  .list{display:flex; flex-wrap:wrap; gap:8px}
+  .chip{border:1px solid var(--line); padding:6px 10px; border-radius:999px; font-size:14px; background:#fff}
+  .dark .chip{border-color:var(--line-dark); background:#0e1318}
+  details{border:1px solid var(--line); border-radius:10px; padding:12px 12px 6px; margin:10px 0}
+  .dark details{border-color:var(--line-dark)}
+  details>summary{cursor:pointer; font-weight:600; list-style:none}
+  details>summary::-webkit-details-marker{display:none}
+  .two{columns:2; column-gap:18px}
+  @media (max-width:700px){ .two{columns:1} }
+  .grid-2{display:grid; grid-template-columns:1fr 1fr; gap:12px}
+  @media (max-width:700px){ .grid-2{grid-template-columns:1fr} }
+  /* ===== Print (nice PDF) ===== */
+  @media print{
+    nav, .controls, .btn, .print-hide{display:none !important}
+    body{background:#fff !important; color:#000 !important}
+    a{color:#000; text-decoration:none}
+    main .wrap{grid-template-columns:1fr}
+    section{break-inside:avoid}
+  }
+</style>
+<script>
+  // Theme toggle with localStorage
+  const setTheme = (m) => {
+    document.documentElement.classList.toggle('dark', m === 'dark');
+    localStorage.setItem('cv-theme', m);
+  };
+  const pref = localStorage.getItem('cv-theme') || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+  if (pref === 'dark') document.documentElement.classList.add('dark');
+  addEventListener('DOMContentLoaded', () => {
+    document.getElementById('toggle-theme').onclick = () => {
+      const now = document.documentElement.classList.contains('dark') ? 'light' : 'dark';
+      setTheme(now);
+    };
+    document.getElementById('print-pdf').onclick = () => window.print();
+  });
+</script>
+</head>
+<body>
+<header>
+  <div class="wrap top">
+    <div class="id">
+      <img class="avatar" src="https://via.placeholder.com/160x160.png?text=Wolf" alt="Wolf headshot" />
+      <div>
+        <h1 class="name">Wolf</h1>
+        <p class="role">EEE student at BUET · ML & VLSI</p>
+        <p class="meta">Dhaka, Bangladesh · <a href="mailto:wolf@example.com">wolf@example.com</a> · <a href="https://github.com/yourusername">github.com/yourusername</a></p>
+      </div>
+    </div>
+    <div class="controls">
+      <button id="toggle-theme" aria-label="Toggle dark mode">Toggle theme</button>
+      <button id="print-pdf" aria-label="Save as PDF">Save as PDF</button>
+      <a class="btn" href="#contact">Contact</a>
+    </div>
+  </div>
+</header>
+
+<nav>
+  <div class="nav">
+    <a href="#about">About</a>
+    <a href="#skills">Skills</a>
+    <a href="#experience">Experience</a>
+    <a href="#projects">Projects</a>
+    <a href="#education">Education</a>
+    <a href="#publications">Publications</a>
+    <a href="#awards">Awards</a>
+    <a href="#contact">Contact</a>
+  </div>
+</nav>
+
+<main>
+  <div class="wrap">
+    <aside aria-label="Quick facts">
+      <div class="box">
+        <h3>Links</h3>
+        <p><a href="https://github.com/yourusername">GitHub</a><br>
+           <a href="https://www.linkedin.com/in/yourusername">LinkedIn</a><br>
+           <a href="https://scholar.google.com/citations?user=XXXXX">Google Scholar</a></p>
+      </div>
+      <div class="box">
+        <h3>Strengths</h3>
+        <div class="list">
+          <span class="chip">OpenROAD</span>
+          <span class="chip">PyTorch</span>
+          <span class="chip">NEGF</span>
+          <span class="chip">Embedded C</span>
+        </div>
+      </div>
+      <div class="box">
+        <h3>Languages</h3>
+        <p>Bengali (native) · English (fluent)</p>
+      </div>
+    </aside>
+
+    <div>
+      <section id="about">
+        <h2>About</h2>
+        <p>EEE undergrad at BUET with projects in physical design, quantum transport, and applied ML. Experienced with OpenROAD flow on IHP SG13G2 PDK, NEGF simulations using Wannier90, and medical imaging pipelines in PyTorch. Seeking roles or graduate opportunities at the intersection of ML and VLSI.</p>
+      </section>
+
+      <section id="skills">
+        <h2>Skills</h2>
+        <div class="grid-2">
+          <div>
+            <h3>Technical</h3>
+            <div class="list">
+              <span class="chip">OpenROAD</span>
+              <span class="chip">Cadence Innovus</span>
+              <span class="chip">Yosys</span>
+              <span class="chip">KLayout LVS</span>
+              <span class="chip">PyTorch</span>
+              <span class="chip">MONAI</span>
+              <span class="chip">TensorRT</span>
+              <span class="chip">ESP32</span>
+              <span class="chip">STM32</span>
+            </div>
+          </div>
+          <div>
+            <h3>Core</h3>
+            <div class="list">
+              <span class="chip">Digital PD</span>
+              <span class="chip">Timing STA</span>
+              <span class="chip">DFT</span>
+              <span class="chip">NEGF</span>
+              <span class="chip">Optimization</span>
+              <span class="chip">Experimental design</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="experience">
+        <h2>Experience</h2>
+
+        <article class="card" aria-labelledby="exp1">
+          <h3 id="exp1">RISC-V SoC Physical Design — OpenROAD</h3>
+          <p class="meta">Self-directed project · 2025 · Dhaka</p>
+          <details>
+            <summary>Summary</summary>
+            <ul>
+              <li>Completed full OpenROAD flow on IHP SG13G2 with 0 DRC after detailed routing</li>
+              <li>Automated IO pad instantiation and PDN script generation</li>
+              <li>Post-route STA, metal density fill, and final GDS sign-off</li>
+            </ul>
+          </details>
+          <p><strong>Tech:</strong> OpenROAD, Yosys, KLayout, TCL, Make</p>
+        </article>
+
+        <article class="card" aria-labelledby="exp2">
+          <h3 id="exp2">Segmentation-aided Skin Lesion Analysis</h3>
+          <p class="meta">Research project · 2025</p>
+          <details>
+            <summary>Summary</summary>
+            <ul>
+              <li>Implemented MRP-UNet + MB-DCNN pipeline on ISIC 2017</li>
+              <li>Achieved ≈0.90 Dice on lesion segmentation</li>
+              <li>Produced CAMs, TTA, and post-processing with CRFs</li>
+            </ul>
+          </details>
+          <p><strong>Tech:</strong> PyTorch, MONAI, timm</p>
+        </article>
+      </section>
+
+      <section id="projects">
+        <h2>Projects</h2>
+        <div class="two">
+          <div class="card">
+            <h3>Quantum Transport NEGF Toolkit</h3>
+            <p class="meta">Python · Wannier90</p>
+            <p>Parsed <code>wannier90_hr.dat</code>, extracted H00/H01, performed eigenvector transforms, and computed transmission via recursive Green’s functions.</p>
+            <p><a href="#">Code</a> · <a href="#">Notes</a></p>
+          </div>
+          <div class="card">
+            <h3>IoT Smart Notice Board (Bangla)</h3>
+            <p class="meta">ESP32 · MD_MAX72XX</p>
+            <p>Time sync with NTP + RTC, web UI to select scrolling messages, bitmap fonts for Bangla digits and months.</p>
+            <p><a href="#">Firmware</a> · <a href="#">Docs</a></p>
+          </div>
+        </div>
+      </section>
+
+      <section id="education">
+        <h2>Education</h2>
+        <div class="card">
+          <h3>Bangladesh University of Engineering & Technology (BUET)</h3>
+          <p class="meta">BSc in Electrical & Electronic Engineering · 2021–2025</p>
+          <p>Focus on VLSI design, machine learning, and signal processing.</p>
+        </div>
+      </section>
+
+      <section id="publications">
+        <h2>Publications</h2>
+        <div class="card">
+          <p>[1] Your Name, et al. “Title goes here.” Conference/Journal, 2025.</p>
+        </div>
+      </section>
+
+      <section id="awards">
+        <h2>Awards</h2>
+        <ul>
+          <li>Departmental Merit Scholarship, BUET (2024)</li>
+          <li>Top project award — VLSI Design Fair (2025)</li>
+        </ul>
+      </section>
+
+      <section id="contact">
+        <h2>Contact</h2>
+        <p>Email: <a href="mailto:wolf@example.com">wolf@example.com</a> · GitHub: <a href="https://github.com/yourusername">yourusername</a> · LinkedIn: <a href="https://linkedin.com/in/yourusername">/in/yourusername</a></p>
+        <p class="meta">Available for research collaborations and roles in ML + VLSI</p>
+      </section>
+    </div>
+  </div>
+</main>
+
+<!-- JSON-LD for rich results -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Person",
+  "name": "Wolf",
+  "url": "https://yourusername.github.io/",
+  "email": "mailto:wolf@example.com",
+  "jobTitle": "EEE Student",
+  "address": { "@type": "PostalAddress", "addressLocality": "Dhaka", "addressCountry": "BD" },
+  "sameAs": [
+    "https://github.com/yourusername",
+    "https://www.linkedin.com/in/yourusername"
+  ]
+}
+</script>
+</body>
+</html>
